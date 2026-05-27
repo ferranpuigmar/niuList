@@ -34,12 +34,14 @@ export default function CreateListPage() {
     },
   })
 
-  if (listId) return <Navigate replace to={`/${listId}/admin/configuracion`} />
 
   const formRef = useAutofillSync(form.setValue, [
     'babyName', 'emoji', 'welcomeMessage',
     'email', 'password', 'coAdminEmail', 'coAdminPassword',
   ])
+
+  if (listId) return <Navigate replace to={`/${listId}/admin/configuracion`} />
+
 
   const {
     register,
