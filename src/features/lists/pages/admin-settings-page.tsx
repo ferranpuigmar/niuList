@@ -150,18 +150,21 @@ export default function AdminSettingsPage() {
             <FormField
               label="Contrasena actual"
               type="password"
+              autoComplete="current-password"
               error={passwordForm.formState.errors.currentPassword?.message}
               {...passwordForm.register('currentPassword')}
             />
             <FormField
               label="Nueva contrasena"
               type="password"
+              autoComplete="new-password"
               error={passwordForm.formState.errors.newPassword?.message}
               {...passwordForm.register('newPassword')}
             />
             <FormField
               label="Confirmar nueva contrasena"
               type="password"
+              autoComplete="new-password"
               error={passwordForm.formState.errors.confirmNewPassword?.message}
               {...passwordForm.register('confirmNewPassword')}
             />

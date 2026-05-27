@@ -64,6 +64,7 @@ export function AddCoAdminDialog({ open, onClose, onAdd }: AddCoAdminDialogProps
             <FormField
               label="Contrasena"
               type="password"
+              autoComplete="new-password"
               error={formState.errors.password?.message}
               {...register('password')}
             />

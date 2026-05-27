@@ -14,6 +14,7 @@ import {
 import { useCreateListMutation } from '../../../features/lists/hooks/use-create-list'
 import { useAuthStore } from '../../../features/auth/store/auth-store'
 import { getFirebaseErrorMessage } from '../../../app/shared/utils/firebase-errors'
+import { useAutofillFix } from '../../shared/hooks/use-autofill-fix'
 
 export default function CreateListPage() {
   const listId = useAuthStore((s) => s.listId)
@@ -32,6 +33,11 @@ export default function CreateListPage() {
       coAdminPassword: '',
     },
   })
+
+  useAutofillFix(
+    ['email', 'password', 'coAdminEmail', 'coAdminPassword'],
+    form.trigger,
+  )
 
   if (listId) return <Navigate replace to={`/${listId}/admin/configuracion`} />
 
@@ -132,6 +138,7 @@ export default function CreateListPage() {
               <FormField
                 label="Contraseña"
                 type="password"
+                autoComplete="new-password"
                 placeholder="••••••••"
                 error={errors.password?.message}
                 {...register('password')}
@@ -146,6 +153,7 @@ export default function CreateListPage() {
               <FormField
                 label="Contraseña co-admin (opcional)"
                 type="password"
+                autoComplete="new-password"
                 placeholder="••••••••"
                 error={errors.coAdminPassword?.message}
                 {...register('coAdminPassword')}

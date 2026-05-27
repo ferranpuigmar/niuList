@@ -51,6 +51,7 @@ export default function LoginPage() {
           <FormField
             label="Contrasena"
             type="password"
+            autoComplete="current-password"
             error={errors.password?.message}
             {...register('password')}
           />
