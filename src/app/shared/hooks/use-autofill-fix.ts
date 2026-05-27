@@ -5,11 +5,35 @@ export function useAutofillFix(
   trigger: (name: string) => void,
 ) {
   useEffect(() => {
-    const timer = setTimeout(() => {
-      for (const name of fieldNames) {
-        trigger(name)
+    const timers = [100, 400, 800].map(delay =>
+      setTimeout(() => {
+        for (const name of fieldNames) {
+          trigger(name)
+        }
+      }, delay),
+    )
+
+    const handleAnimationStart = (e: AnimationEvent) => {
+      if (
+        e.animationName === 'mui-auto-fill' &&
+        e.target instanceof HTMLInputElement &&
+        e.target.name
+      ) {
+        trigger(e.target.name)
       }
-    }, 100)
-    return () => clearTimeout(timer)
-  }, [])
+    }
+
+    document.addEventListener(
+      'animationstart',
+      handleAnimationStart as EventListener,
+    )
+
+    return () => {
+      timers.forEach(clearTimeout)
+      document.removeEventListener(
+        'animationstart',
+        handleAnimationStart as EventListener,
+      )
+    }
+  }, [fieldNames, trigger])
 }
