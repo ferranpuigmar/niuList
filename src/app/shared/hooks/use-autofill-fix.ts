@@ -11,7 +11,7 @@ export function useAutofillFix(
         e.target instanceof HTMLInputElement &&
         fieldNames.includes(e.target.name)
       ) {
-        trigger(e.target.name)
+        setTimeout(() => trigger(e.target.name), 0)
       }
     }
 
