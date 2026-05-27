@@ -1,4 +1,5 @@
 import { Baby, Shield, Sparkles } from 'lucide-react'
+import { useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Navigate } from 'react-router-dom'
@@ -32,6 +33,31 @@ export default function CreateListPage() {
       coAdminPassword: '',
     },
   })
+
+  const formRef = useRef<HTMLFormElement>(null)
+
+  useEffect(() => {
+    const formEl = formRef.current
+    if (!formEl) return
+
+    const syncAutofill = () => {
+      const fields = ['babyName', 'emoji', 'welcomeMessage', 'email', 'password', 'coAdminEmail', 'coAdminPassword'] as const
+      for (const name of fields) {
+        const el = formEl.querySelector<HTMLInputElement | HTMLTextAreaElement>(`[name="${name}"]`)
+        if (el && el.value) {
+          form.setValue(name, el.value, { shouldValidate: false, shouldDirty: true })
+        }
+      }
+    }
+
+    formEl.addEventListener('input', syncAutofill)
+    const timer = setTimeout(syncAutofill, 500)
+
+    return () => {
+      formEl.removeEventListener('input', syncAutofill)
+      clearTimeout(timer)
+    }
+  }, [])
 
   if (listId) return <Navigate replace to={`/${listId}/admin/configuracion`} />
 
@@ -73,7 +99,7 @@ export default function CreateListPage() {
           </div>
         </div>
 
-        <form className="flex w-full flex-col gap-8" noValidate onSubmit={handleSubmit(onSubmit)}>
+        <form ref={formRef} className="flex w-full flex-col gap-8" noValidate onSubmit={handleSubmit(onSubmit)}>
           <div className="grid w-full gap-6 md:grid-cols-2">
             <div className="flex flex-col gap-6 rounded-2xl border border-stroke-default bg-canvas-surface p-7">
               <div className="flex items-center gap-3">
