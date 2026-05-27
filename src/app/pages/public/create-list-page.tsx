@@ -21,7 +21,7 @@ export default function CreateListPage() {
 
   const form = useForm({
     resolver: zodResolver(createListSchema),
-    mode: 'onTouched',
+    mode: 'onSubmit',
     defaultValues: {
       babyName: '',
       emoji: '',
