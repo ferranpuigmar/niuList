@@ -1,5 +1,4 @@
 import { Baby, Shield, Sparkles } from 'lucide-react'
-import { useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Navigate } from 'react-router-dom'
@@ -15,6 +14,7 @@ import {
 import { useCreateListMutation } from '../../../features/lists/hooks/use-create-list'
 import { useAuthStore } from '../../../features/auth/store/auth-store'
 import { getFirebaseErrorMessage } from '../../../app/shared/utils/firebase-errors'
+import { useAutofillSync } from '../../shared/hooks/use-autofill-sync'
 
 export default function CreateListPage() {
   const listId = useAuthStore((s) => s.listId)
@@ -34,32 +34,10 @@ export default function CreateListPage() {
     },
   })
 
-  const formRef = useRef<HTMLFormElement>(null)
-
-  useEffect(() => {
-    const formEl = formRef.current
-    if (!formEl) return
-
-    const syncAutofill = () => {
-      const fields = ['babyName', 'emoji', 'welcomeMessage', 'email', 'password', 'coAdminEmail', 'coAdminPassword'] as const
-      for (const name of fields) {
-        const el = formEl.querySelector<HTMLInputElement | HTMLTextAreaElement>(`[name="${name}"]`)
-        if (el && el.value) {
-          form.setValue(name, el.value, { shouldValidate: false, shouldDirty: true })
-        }
-      }
-    }
-
-    formEl.addEventListener('input', syncAutofill)
-    const timer = setTimeout(syncAutofill, 500)
-
-    return () => {
-      formEl.removeEventListener('input', syncAutofill)
-      clearTimeout(timer)
-    }
-  }, [])
-
-  if (listId) return <Navigate replace to={`/${listId}/admin/configuracion`} />
+  const formRef = useAutofillSync(form.setValue, [
+    'babyName', 'emoji', 'welcomeMessage',
+    'email', 'password', 'coAdminEmail', 'coAdminPassword',
+  ])
 
   const {
     register,
