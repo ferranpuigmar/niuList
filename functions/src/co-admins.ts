@@ -1,4 +1,5 @@
-import * as functions from 'firebase-functions'
+import { onCall, HttpsError } from 'firebase-functions/v2/https'
+import * as logger from 'firebase-functions/logger'
 import { getAuth } from 'firebase-admin/auth'
 import { getFirestore, FieldValue } from 'firebase-admin/firestore'
 
@@ -22,21 +23,21 @@ function isEmailExistsError(err: unknown): boolean {
  * auth session (which client-side createUserWithEmailAndPassword would), and
  * so only an existing admin of the list can add co-admins.
  */
-export const addCoAdmin = functions.https.onCall(async (data: AddCoAdminData, context) => {
-  const callerUid = context.auth?.uid
+export const addCoAdmin = onCall<AddCoAdminData>(async (request) => {
+  const callerUid = request.auth?.uid
   if (!callerUid) {
-    throw new functions.https.HttpsError('unauthenticated', 'Debes iniciar sesión')
+    throw new HttpsError('unauthenticated', 'Debes iniciar sesión')
   }
 
-  const listId = data.listId?.trim()
-  const email = data.email?.trim()
-  const password = data.password
+  const listId = request.data.listId?.trim()
+  const email = request.data.email?.trim()
+  const password = request.data.password
 
   if (!listId || !email || !password) {
-    throw new functions.https.HttpsError('invalid-argument', 'Faltan datos del co-admin')
+    throw new HttpsError('invalid-argument', 'Faltan datos del co-admin')
   }
   if (password.length < 6) {
-    throw new functions.https.HttpsError('invalid-argument', 'La contraseña debe tener al menos 6 caracteres')
+    throw new HttpsError('invalid-argument', 'La contraseña debe tener al menos 6 caracteres')
   }
 
   const db = getFirestore()
@@ -44,12 +45,12 @@ export const addCoAdmin = functions.https.onCall(async (data: AddCoAdminData, co
   const listSnap = await listRef.get()
 
   if (!listSnap.exists) {
-    throw new functions.https.HttpsError('not-found', 'La lista no existe')
+    throw new HttpsError('not-found', 'La lista no existe')
   }
 
   const adminIds: string[] = listSnap.data()?.adminIds ?? []
   if (!adminIds.includes(callerUid)) {
-    throw new functions.https.HttpsError('permission-denied', 'No eres administrador de esta lista')
+    throw new HttpsError('permission-denied', 'No eres administrador de esta lista')
   }
 
   // Create the co-admin account, or reuse it if the email already exists.
@@ -62,8 +63,8 @@ export const addCoAdmin = functions.https.onCall(async (data: AddCoAdminData, co
       const existing = await getAuth().getUserByEmail(email)
       coAdminUid = existing.uid
     } else {
-      functions.logger.error('Failed to create co-admin', err)
-      throw new functions.https.HttpsError('internal', 'No se pudo crear el co-admin')
+      logger.error('Failed to create co-admin', err)
+      throw new HttpsError('internal', 'No se pudo crear el co-admin')
     }
   }
 

@@ -1,4 +1,4 @@
-import * as functions from 'firebase-functions'
+import { onCall, HttpsError } from 'firebase-functions/v2/https'
 import { getFirestore, FieldValue } from 'firebase-admin/firestore'
 
 import { hashToken } from './utils/token.js'
@@ -24,14 +24,14 @@ function giftDoc(listId: string, giftId: string) {
  * Reserve a pending gift. Runs in a transaction so two visitors can't grab the
  * same gift at once, and stores only the hash of the visitor's token.
  */
-export const reserveGift = functions.https.onCall(async (data: ReserveData) => {
-  const listId = data.listId?.trim()
-  const giftId = data.giftId?.trim()
-  const visitorName = data.visitorName?.trim()
-  const visitorToken = data.visitorToken?.trim()
+export const reserveGift = onCall<ReserveData>(async (request) => {
+  const listId = request.data.listId?.trim()
+  const giftId = request.data.giftId?.trim()
+  const visitorName = request.data.visitorName?.trim()
+  const visitorToken = request.data.visitorToken?.trim()
 
   if (!listId || !giftId || !visitorName || !visitorToken) {
-    throw new functions.https.HttpsError('invalid-argument', 'Faltan datos de la reserva')
+    throw new HttpsError('invalid-argument', 'Faltan datos de la reserva')
   }
 
   const ref = giftDoc(listId, giftId)
@@ -39,10 +39,10 @@ export const reserveGift = functions.https.onCall(async (data: ReserveData) => {
   await getFirestore().runTransaction(async (tx) => {
     const snap = await tx.get(ref)
     if (!snap.exists) {
-      throw new functions.https.HttpsError('not-found', 'El regalo no existe')
+      throw new HttpsError('not-found', 'El regalo no existe')
     }
     if (snap.data()?.status !== 'pending') {
-      throw new functions.https.HttpsError('failed-precondition', 'El regalo ya no está disponible')
+      throw new HttpsError('failed-precondition', 'El regalo ya no está disponible')
     }
 
     tx.update(ref, {
@@ -59,13 +59,13 @@ export const reserveGift = functions.https.onCall(async (data: ReserveData) => {
 })
 
 /** Cancel a reservation — only the visitor who made it (matching token) can. */
-export const cancelReservation = functions.https.onCall(async (data: OwnedActionData) => {
-  const listId = data.listId?.trim()
-  const giftId = data.giftId?.trim()
-  const visitorToken = data.visitorToken?.trim()
+export const cancelReservation = onCall<OwnedActionData>(async (request) => {
+  const listId = request.data.listId?.trim()
+  const giftId = request.data.giftId?.trim()
+  const visitorToken = request.data.visitorToken?.trim()
 
   if (!listId || !giftId || !visitorToken) {
-    throw new functions.https.HttpsError('invalid-argument', 'Faltan datos')
+    throw new HttpsError('invalid-argument', 'Faltan datos')
   }
 
   const ref = giftDoc(listId, giftId)
@@ -73,11 +73,11 @@ export const cancelReservation = functions.https.onCall(async (data: OwnedAction
   await getFirestore().runTransaction(async (tx) => {
     const snap = await tx.get(ref)
     if (!snap.exists) {
-      throw new functions.https.HttpsError('not-found', 'El regalo no existe')
+      throw new HttpsError('not-found', 'El regalo no existe')
     }
     const gift = snap.data()!
     if (gift.status !== 'reserved' || gift.reservedByTokenHash !== hashToken(visitorToken)) {
-      throw new functions.https.HttpsError('permission-denied', 'No puedes cancelar esta reserva')
+      throw new HttpsError('permission-denied', 'No puedes cancelar esta reserva')
     }
 
     tx.update(ref, {
@@ -94,13 +94,13 @@ export const cancelReservation = functions.https.onCall(async (data: OwnedAction
 })
 
 /** Mark a reserved gift as bought — only the visitor who reserved it. */
-export const markGiftBought = functions.https.onCall(async (data: OwnedActionData) => {
-  const listId = data.listId?.trim()
-  const giftId = data.giftId?.trim()
-  const visitorToken = data.visitorToken?.trim()
+export const markGiftBought = onCall<OwnedActionData>(async (request) => {
+  const listId = request.data.listId?.trim()
+  const giftId = request.data.giftId?.trim()
+  const visitorToken = request.data.visitorToken?.trim()
 
   if (!listId || !giftId || !visitorToken) {
-    throw new functions.https.HttpsError('invalid-argument', 'Faltan datos')
+    throw new HttpsError('invalid-argument', 'Faltan datos')
   }
 
   const ref = giftDoc(listId, giftId)
@@ -108,11 +108,11 @@ export const markGiftBought = functions.https.onCall(async (data: OwnedActionDat
   await getFirestore().runTransaction(async (tx) => {
     const snap = await tx.get(ref)
     if (!snap.exists) {
-      throw new functions.https.HttpsError('not-found', 'El regalo no existe')
+      throw new HttpsError('not-found', 'El regalo no existe')
     }
     const gift = snap.data()!
     if (gift.status !== 'reserved' || gift.reservedByTokenHash !== hashToken(visitorToken)) {
-      throw new functions.https.HttpsError('permission-denied', 'No puedes marcar este regalo')
+      throw new HttpsError('permission-denied', 'No puedes marcar este regalo')
     }
 
     tx.update(ref, {
