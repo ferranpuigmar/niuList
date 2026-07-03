@@ -8,7 +8,7 @@ type GiftCardProps = {
   gift: Gift
   variant?: 'public' | 'admin'
   onClick?: () => void
-  visitorToken?: string
+  visitorTokenHash?: string
 }
 
 const placeholderColors = [
@@ -23,8 +23,11 @@ function getPlaceholderColor(id: string) {
   return placeholderColors[Math.abs(hash) % placeholderColors.length]
 }
 
-export function GiftCard({ gift, variant = 'public', onClick, visitorToken }: GiftCardProps) {
-  const isMine = gift.status === 'reserved' && visitorToken && gift.reservedByToken === visitorToken
+export function GiftCard({ gift, variant = 'public', onClick, visitorTokenHash }: GiftCardProps) {
+  const isMine =
+    gift.status === 'reserved' &&
+    !!visitorTokenHash &&
+    gift.reservedByTokenHash === visitorTokenHash
   const isDisabled = gift.status !== 'pending' && variant === 'public' && !isMine
 
   return (

@@ -1,6 +1,5 @@
 import {
   createUserWithEmailAndPassword,
-  onAuthStateChanged,
   signInWithEmailAndPassword,
   signOut,
   updatePassword,
@@ -17,10 +16,6 @@ export function login(email: string, password: string): Promise<UserCredential> 
 
 export function logout() {
   return signOut(auth)
-}
-
-export function observeAuthState(callback: (uid: string | null) => void) {
-  return onAuthStateChanged(auth, (user) => callback(user?.uid ?? null))
 }
 
 export function createAuthUser(email: string, password: string): Promise<UserCredential> {

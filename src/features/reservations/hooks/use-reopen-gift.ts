@@ -1,14 +1,9 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 
-import { reopenGift } from '../api/reservations/service'
+import { reopenGift } from '../api/reservations/admin-service'
 
 export function useReopenGift(listId: string) {
-  const queryClient = useQueryClient()
-
   return useMutation({
     mutationFn: (giftId: string) => reopenGift(listId, giftId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['gifts', listId] })
-    },
   })
 }

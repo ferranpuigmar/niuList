@@ -17,7 +17,7 @@ import { StatusBadge } from '../../../app/shared/components/status-badge'
 import { StatCard } from '../components/stat-card'
 import { ShareButton } from '../../sharing/components/share-button'
 import { useGifts } from '../hooks/use-gifts'
-import { useMarkBought } from '../../reservations/hooks/use-mark-bought'
+import { useAdminMarkBought } from '../../reservations/hooks/use-admin-mark-bought'
 import { useReopenGift } from '../../reservations/hooks/use-reopen-gift'
 
 export default function AdminListPage() {
@@ -25,7 +25,7 @@ export default function AdminListPage() {
   const listId = params.listId ?? ''
 
   const { gifts, loading } = useGifts(listId)
-  const markBoughtMutation = useMarkBought(listId)
+  const markBoughtMutation = useAdminMarkBought(listId)
   const reopenMutation = useReopenGift(listId)
   const [confirmAction, setConfirmAction] = useState<{ type: 'reopen' | 'markBought'; giftId: string } | null>(null)
 

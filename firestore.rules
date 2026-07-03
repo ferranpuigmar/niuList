@@ -18,9 +18,10 @@ service cloud.firestore {
     match /lists/{listId}/gifts/{giftId} {
       allow read: if true;
       allow create, delete: if isListAdmin(listId);
-      // Allow public updates for reservations (status, reservedBy, etc.)
-      // Full enforcement of reservation tokens requires Cloud Functions.
-      allow update: if isListAdmin(listId) || true;
+      // Only admins write directly. Visitor reservation actions (reserve /
+      // cancel / mark-bought) go through Cloud Functions, which use the Admin
+      // SDK and validate ownership server-side, so no public write is allowed.
+      allow update: if isListAdmin(listId);
     }
   }
 }

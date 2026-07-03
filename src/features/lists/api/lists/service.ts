@@ -1,6 +1,5 @@
 import {
   addDoc,
-  arrayUnion,
   collection,
   doc,
   getDoc,
@@ -51,14 +50,6 @@ export function updateListById(
   const listRef = doc(db, 'lists', listId)
   return updateDoc(listRef, {
     ...input,
-    updatedAt: serverTimestamp(),
-  })
-}
-
-export function addCoAdminToList(listId: string, uid: string) {
-  const listRef = doc(db, 'lists', listId)
-  return updateDoc(listRef, {
-    adminIds: arrayUnion(uid),
     updatedAt: serverTimestamp(),
   })
 }

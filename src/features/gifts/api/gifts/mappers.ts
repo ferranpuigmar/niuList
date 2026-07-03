@@ -1,12 +1,10 @@
-import type { DocumentData, DocumentSnapshot } from 'firebase/firestore'
+import type { DocumentData, QueryDocumentSnapshot } from 'firebase/firestore'
 
 import type { Gift } from '../../types/gift-type'
 
-export function mapGiftSnapshot(snapshot: DocumentSnapshot<DocumentData>): Gift {
-  const data = snapshot.data()
-
+export function mapGiftDoc(id: string, data: DocumentData): Gift {
   return {
-    id: snapshot.id,
+    id,
     name: data.name,
     price: data.price,
     purchaseUrl: data.purchaseUrl,
@@ -16,10 +14,15 @@ export function mapGiftSnapshot(snapshot: DocumentSnapshot<DocumentData>): Gift 
     imageUrl: data.imageUrl,
     status: data.status,
     reservedBy: data.reservedBy,
-    reservedByToken: data.reservedByToken,
+    reservedByTokenHash: data.reservedByTokenHash,
     reservedAt: data.reservedAt,
     boughtAt: data.boughtAt,
     createdAt: data.createdAt,
     updatedAt: data.updatedAt,
   }
+}
+
+// Only ever called on query result docs (snapshot.docs), which always have data.
+export function mapGiftSnapshot(snapshot: QueryDocumentSnapshot<DocumentData>): Gift {
+  return mapGiftDoc(snapshot.id, snapshot.data())
 }

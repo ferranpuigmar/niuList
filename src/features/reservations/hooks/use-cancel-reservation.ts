@@ -4,6 +4,7 @@ import { cancelReservation } from '../api/reservations/service'
 
 export function useCancelReservation(listId: string) {
   return useMutation({
-    mutationFn: (giftId: string) => cancelReservation(listId, giftId),
+    mutationFn: ({ giftId, visitorToken }: { giftId: string; visitorToken: string }) =>
+      cancelReservation(listId, giftId, visitorToken),
   })
 }

@@ -3,13 +3,9 @@ import {
   collection,
   deleteDoc,
   doc,
-  onSnapshot,
-  orderBy,
-  query,
   serverTimestamp,
   updateDoc,
 } from 'firebase/firestore'
-import type { QuerySnapshot, DocumentData } from 'firebase/firestore'
 
 import { db } from '../../../../lib/firebase'
 
@@ -46,16 +42,4 @@ export function updateGift(listId: string, giftId: string, input: Partial<GiftIn
 export function deleteGift(listId: string, giftId: string) {
   const giftRef = doc(db, 'lists', listId, 'gifts', giftId)
   return deleteDoc(giftRef)
-}
-
-export function subscribeToGifts(
-  listId: string,
-  onChange: (snapshot: QuerySnapshot<DocumentData>) => void,
-) {
-  const giftsQuery = query(
-    collection(db, 'lists', listId, 'gifts'),
-    orderBy('createdAt', 'desc'),
-  )
-
-  return onSnapshot(giftsQuery, onChange)
 }

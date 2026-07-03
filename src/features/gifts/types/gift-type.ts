@@ -11,7 +11,7 @@ export type Gift = {
   imageUrl?: string
   status: GiftStatus
   reservedBy?: string
-  reservedByToken?: string
+  reservedByTokenHash?: string
   reservedAt?: unknown
   boughtAt?: unknown
   createdAt?: unknown
