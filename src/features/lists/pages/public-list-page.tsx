@@ -11,10 +11,10 @@ export default function PublicListPage() {
   const navigate = useNavigate()
   const params = useParams()
   const listId = params.listId ?? ''
-  const { visitorToken } = useVisitor()
+  const { visitorTokenHash } = useVisitor()
 
-  const { data: list, isLoading: listLoading } = useList(listId)
-  const { gifts, loading: giftsLoading } = useGifts(listId)
+  const { data: list, isLoading: listLoading, isError: listError } = useList(listId)
+  const { gifts, loading: giftsLoading, error: giftsError } = useGifts(listId)
 
   const total = gifts.length
   const bought = gifts.filter((g) => g.status === 'bought').length
@@ -24,6 +24,14 @@ export default function PublicListPage() {
     return (
       <PageShell className="py-10 text-center text-sm text-fg-secondary">
         Cargando...
+      </PageShell>
+    )
+  }
+
+  if (listError || giftsError || !list) {
+    return (
+      <PageShell className="py-10 text-center text-sm text-fg-secondary">
+        No hemos podido cargar la lista. Vuelve a intentarlo más tarde.
       </PageShell>
     )
   }
@@ -70,7 +78,7 @@ export default function PublicListPage() {
             <GiftCard
               gift={gift}
               key={gift.id}
-              visitorToken={visitorToken}
+              visitorTokenHash={visitorTokenHash}
               onClick={() => navigate(`/${listId}/regalo/${gift.id}`)}
             />
           ))}

@@ -12,7 +12,7 @@ import { PageShell } from '../../../app/shared/components/page-shell'
 import { useGifts } from '../hooks/use-gifts'
 import { useUpdateGift } from '../hooks/use-update-gift'
 import { useDeleteGift } from '../hooks/use-delete-gift'
-import { useMarkBought } from '../../reservations/hooks/use-mark-bought'
+import { useAdminMarkBought } from '../../reservations/hooks/use-admin-mark-bought'
 import { useReopenGift } from '../../reservations/hooks/use-reopen-gift'
 import { giftSchema, type GiftValues } from '../schemas/gift-schemas'
 
@@ -37,7 +37,7 @@ export default function AdminEditGiftPage() {
   const { gifts, loading } = useGifts(listId)
   const updateMutation = useUpdateGift()
   const deleteMutation = useDeleteGift()
-  const markBoughtMutation = useMarkBought(listId)
+  const markBoughtMutation = useAdminMarkBought(listId)
   const reopenMutation = useReopenGift(listId)
 
   const gift = gifts.find((g) => g.id === giftId)

@@ -14,6 +14,7 @@ import { useGift } from '../hooks/use-gift'
 import { useReserveGift } from '../../reservations/hooks/use-reserve-gift'
 import { useCancelReservation } from '../../reservations/hooks/use-cancel-reservation'
 import { useMarkBought } from '../../reservations/hooks/use-mark-bought'
+import { useAdminMarkBought } from '../../reservations/hooks/use-admin-mark-bought'
 import { useReopenGift } from '../../reservations/hooks/use-reopen-gift'
 import { useVisitor } from '../../reservations/hooks/use-visitor'
 import { formatPrice } from '../../../app/shared/utils/format-price'
@@ -30,12 +31,13 @@ export default function GiftDetailPage() {
   const authUser = useAuthStore((s) => s.user)
   const isAdmin = !!authUser
 
-  const { visitorToken, setVisitorName } = useVisitor()
+  const { visitorToken, visitorTokenHash, setVisitorName } = useVisitor()
 
   const { gift, loading } = useGift(listId, giftId)
   const reserveMutation = useReserveGift(listId)
   const cancelMutation = useCancelReservation(listId)
   const markBoughtMutation = useMarkBought(listId)
+  const adminMarkBoughtMutation = useAdminMarkBought(listId)
   const reopenMutation = useReopenGift(listId)
   const [confirmAction, setConfirmAction] = useState<'reopen' | 'markBought' | null>(null)
 
@@ -56,11 +58,11 @@ export default function GiftDetailPage() {
   }
 
   const handleCancel = async () => {
-    await cancelMutation.mutateAsync(giftId)
+    await cancelMutation.mutateAsync({ giftId, visitorToken })
   }
 
   const handleMarkBought = async () => {
-    await markBoughtMutation.mutateAsync(giftId)
+    await markBoughtMutation.mutateAsync({ giftId, visitorToken })
   }
 
   if (loading) {
@@ -79,7 +81,10 @@ export default function GiftDetailPage() {
     )
   }
 
-  const isMyReservation = gift.status === 'reserved' && gift.reservedByToken === visitorToken
+  const isMyReservation =
+    gift.status === 'reserved' &&
+    !!visitorTokenHash &&
+    gift.reservedByTokenHash === visitorTokenHash
   const isReservedByOther = gift.status === 'reserved' && !isMyReservation
 
   return (
@@ -223,7 +228,7 @@ export default function GiftDetailPage() {
                 Administrar
               </div>
               <Button
-                disabled={gift.status === 'pending' || reopenMutation.isPending || markBoughtMutation.isPending}
+                disabled={gift.status === 'pending' || reopenMutation.isPending || adminMarkBoughtMutation.isPending}
                 fullWidth
                 variant="outline"
                 onClick={() => setConfirmAction('reopen')}
@@ -232,7 +237,7 @@ export default function GiftDetailPage() {
                 Reabrir regalo
               </Button>
               <Button
-                disabled={gift.status === 'bought' || markBoughtMutation.isPending || reopenMutation.isPending}
+                disabled={gift.status === 'bought' || adminMarkBoughtMutation.isPending || reopenMutation.isPending}
                 fullWidth
                 variant="outline"
                 onClick={() => setConfirmAction('markBought')}
@@ -263,11 +268,11 @@ export default function GiftDetailPage() {
         message="El regalo se marcara como comprado. Esta accion no se puede deshacer desde la web."
         onClose={() => setConfirmAction(null)}
         onConfirm={() => {
-          markBoughtMutation.mutate(giftId)
+          adminMarkBoughtMutation.mutate(giftId)
           setConfirmAction(null)
         }}
         open={confirmAction === 'markBought'}
-        pending={markBoughtMutation.isPending}
+        pending={adminMarkBoughtMutation.isPending}
         title="Marcar como comprado?"
       />
     </PageShell>

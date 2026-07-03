@@ -1,9 +1,10 @@
 import { useMutation } from '@tanstack/react-query'
 
-import { markGiftAsBought } from '../api/reservations/service'
+import { markGiftBought } from '../api/reservations/service'
 
 export function useMarkBought(listId: string) {
   return useMutation({
-    mutationFn: (giftId: string) => markGiftAsBought(listId, giftId),
+    mutationFn: ({ giftId, visitorToken }: { giftId: string; visitorToken: string }) =>
+      markGiftBought(listId, giftId, visitorToken),
   })
 }
