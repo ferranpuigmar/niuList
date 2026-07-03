@@ -14,9 +14,13 @@ export function AuthInitializer() {
     if (user && !listId) {
       getListsByAdminId(user.uid)
         .then((snap) => {
-          if (!snap.empty) {
-            setListId(snap.docs[0].id)
-          }
+          if (snap.empty) return
+          // Deterministically pick the user's oldest (original) list instead of
+          // relying on the arbitrary default document order.
+          const millis = (doc: (typeof snap.docs)[number]) =>
+            doc.data().createdAt?.toMillis?.() ?? 0
+          const oldest = [...snap.docs].sort((a, b) => millis(a) - millis(b))[0]
+          setListId(oldest.id)
         })
         .catch(() => {})
     }
