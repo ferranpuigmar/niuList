@@ -14,7 +14,6 @@ import {
 import { useCreateListMutation } from '../../../features/lists/hooks/use-create-list'
 import { useAuthStore } from '../../../features/auth/store/auth-store'
 import { getFirebaseErrorMessage } from '../../../app/shared/utils/firebase-errors'
-import { useAutofillSync } from '../../shared/hooks/use-autofill-sync'
 
 export default function CreateListPage() {
   const listId = useAuthStore((s) => s.listId)
@@ -33,12 +32,6 @@ export default function CreateListPage() {
       coAdminPassword: '',
     },
   })
-
-
-  const formRef = useAutofillSync(form.setValue, [
-    'babyName', 'emoji', 'welcomeMessage',
-    'email', 'password', 'coAdminEmail', 'coAdminPassword',
-  ])
 
   if (listId) return <Navigate replace to={`/${listId}/admin/configuracion`} />
 
@@ -81,7 +74,7 @@ export default function CreateListPage() {
           </div>
         </div>
 
-        <form ref={formRef} className="flex w-full flex-col gap-8" noValidate onSubmit={handleSubmit(onSubmit)}>
+        <form className="flex w-full flex-col gap-8" noValidate onSubmit={handleSubmit(onSubmit)}>
           <div className="grid w-full gap-6 md:grid-cols-2">
             <div className="flex flex-col gap-6 rounded-2xl border border-stroke-default bg-canvas-surface p-7">
               <div className="flex items-center gap-3">
