@@ -1,20 +1,20 @@
 import { z } from 'zod'
 
 export const updateListSchema = z.object({
-  babyName: z.string().default('').pipe(z.string().min(2, 'Escribe al menos 2 caracteres')),
-  emoji: z.string().default(''),
-  welcomeMessage: z.string().default('').pipe(z.string().min(8, 'Minimo 8 caracteres')),
+  babyName: z.string().min(2, 'Escribe al menos 2 caracteres'),
+  emoji: z.string(),
+  welcomeMessage: z.string().min(8, 'Minimo 8 caracteres'),
 })
 
 export const createListSchema = z
   .object({
-    babyName: z.string().default('').pipe(z.string().min(2, 'Escribe al menos 2 caracteres')),
-    emoji: z.string().default(''),
-    welcomeMessage: z.string().default('').pipe(z.string().min(8, 'Minimo 8 caracteres')),
-    email: z.string().default('').pipe(z.email('Introduce un email valido')),
-    password: z.string().default('').pipe(z.string().min(6, 'Minimo 6 caracteres')),
-    coAdminEmail: z.string().default('').pipe(z.email('Introduce un email valido').or(z.literal(''))),
-    coAdminPassword: z.string().default(''),
+    babyName: z.string().min(2, 'Escribe al menos 2 caracteres'),
+    emoji: z.string(),
+    welcomeMessage: z.string().min(8, 'Minimo 8 caracteres'),
+    email: z.email('Introduce un email valido'),
+    password: z.string().min(6, 'Minimo 6 caracteres'),
+    coAdminEmail: z.email('Introduce un email valido').or(z.literal('')),
+    coAdminPassword: z.string(),
   })
   .superRefine((values, ctx) => {
     if (values.coAdminEmail && !values.coAdminPassword) {
@@ -26,18 +26,6 @@ export const createListSchema = z
     }
   })
 
-export type UpdateListValues = {
-  babyName: string
-  emoji: string
-  welcomeMessage: string
-}
+export type UpdateListValues = z.infer<typeof updateListSchema>
 
-export type CreateListValues = {
-  babyName: string
-  emoji: string
-  welcomeMessage: string
-  email: string
-  password: string
-  coAdminEmail: string
-  coAdminPassword: string
-}
+export type CreateListValues = z.infer<typeof createListSchema>
