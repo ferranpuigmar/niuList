@@ -13,3 +13,7 @@ npm run dev
 ```
 
 Necesitas un archivo `.env` con las credenciales de Firebase. Pídelas al administrador del proyecto.
+
+## Documentación
+
+📚 Documentación completa de onboarding (arquitectura, features, flujos) en [docs/](docs/README.md).
