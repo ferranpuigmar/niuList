@@ -2,6 +2,7 @@ export const ROUTES = {
   landing: '/',
   login: '/login',
   createList: '/crear',
+  importVisitor: '/importar',
   publicList: '/:listId',
   giftDetail: '/:listId/regalo/:giftId',
   admin: '/:listId/admin',

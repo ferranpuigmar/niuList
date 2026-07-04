@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ExternalLink, RotateCcw, ShieldAlert, ShoppingBag } from 'lucide-react'
+import { ExternalLink, QrCode, RotateCcw, ShieldAlert, ShoppingBag } from 'lucide-react'
 
 import { Button } from '../../../app/shared/components/button'
 import { ConfirmDialog } from '../../../app/shared/components/confirm-dialog'
@@ -17,6 +17,7 @@ import { useMarkBought } from '../../reservations/hooks/use-mark-bought'
 import { useAdminMarkBought } from '../../reservations/hooks/use-admin-mark-bought'
 import { useReopenGift } from '../../reservations/hooks/use-reopen-gift'
 import { useVisitor } from '../../reservations/hooks/use-visitor'
+import { TransferDialog } from '../../reservations/components/transfer-dialog'
 import { formatPrice } from '../../../app/shared/utils/format-price'
 import {
   reserveGiftSchema,
@@ -40,6 +41,7 @@ export default function GiftDetailPage() {
   const adminMarkBoughtMutation = useAdminMarkBought(listId)
   const reopenMutation = useReopenGift(listId)
   const [confirmAction, setConfirmAction] = useState<'reopen' | 'markBought' | null>(null)
+  const [transferOpen, setTransferOpen] = useState(false)
 
   const form = useForm<ReserveGiftValues>({
     resolver: zodResolver(reserveGiftSchema),
@@ -190,6 +192,10 @@ export default function GiftDetailPage() {
                 >
                   {cancelMutation.isPending ? 'Cancelando...' : 'Cancelar reserva'}
                 </Button>
+                <Button variant="ghost" onClick={() => setTransferOpen(true)}>
+                  <QrCode className="h-4 w-4" />
+                  Usar en otro dispositivo
+                </Button>
               </div>
             </div>
           ) : null}
@@ -274,6 +280,13 @@ export default function GiftDetailPage() {
         open={confirmAction === 'markBought'}
         pending={adminMarkBoughtMutation.isPending}
         title="Marcar como comprado?"
+      />
+
+      <TransferDialog
+        listId={listId}
+        onClose={() => setTransferOpen(false)}
+        open={transferOpen}
+        visitorToken={visitorToken}
       />
     </PageShell>
   )

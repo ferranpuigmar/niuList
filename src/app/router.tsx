@@ -13,6 +13,7 @@ import {
   AdminSettingsPage,
   CreateListPage,
   GiftDetailPage,
+  ImportVisitorPage,
   LandingPage,
   LoginPage,
   PublicListPage,
@@ -35,6 +36,14 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<RouteFallback />}>
             <LoginPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: ROUTES.importVisitor,
+        element: (
+          <Suspense fallback={<RouteFallback />}>
+            <ImportVisitorPage />
           </Suspense>
         ),
       },
