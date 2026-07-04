@@ -115,6 +115,7 @@ Definidas en `src/app/routes.ts` y montadas en `src/app/router.tsx`. Todas las p
 | `/` | LandingPage | PublicLayout |
 | `/login` | LoginPage | PublicLayout |
 | `/crear` | CreateListPage | (sin layout; redirige a settings si ya tienes lista) |
+| `/importar` | ImportVisitorPage | PublicLayout — recibe la identidad de visitante desde otro dispositivo |
 | `/:listId` | PublicListPage | PublicLayout |
 | `/:listId/regalo/:giftId` | GiftDetailPage | PublicLayout |
 | `/:listId/admin` | AdminListPage | AuthGuard → AdminLayout |

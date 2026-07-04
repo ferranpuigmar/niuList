@@ -12,14 +12,19 @@ src/features/reservations/
 │   ├── index.ts
 │   └── reservations/
 │       ├── service.ts        # VISITANTE: callables reserveGift, cancelReservation, markGiftBought
-│       └── admin-service.ts  # ADMIN: reopenGift, adminMarkGiftBought (Firestore directo)
+│       ├── admin-service.ts  # ADMIN: reopenGift, adminMarkGiftBought (Firestore directo)
+│       └── transfer.ts       # getTransferUrl: URL de transferencia con el token en el #fragment
+├── components/
+│   └── transfer-dialog.tsx       # Dialog "Usar en otro dispositivo": QR + copiar/compartir enlace
 ├── hooks/
-│   ├── use-visitor.ts            # token + hash del visitante (localStorage)
+│   ├── use-visitor.ts            # token + hash del visitante (localStorage) + import/export del token
 │   ├── use-reserve-gift.ts       # visitante
 │   ├── use-cancel-reservation.ts # visitante
 │   ├── use-mark-bought.ts        # visitante
 │   ├── use-admin-mark-bought.ts  # admin
 │   └── use-reopen-gift.ts        # admin
+├── pages/
+│   └── import-visitor-page.tsx   # /importar — recibe el token en otro dispositivo
 └── schemas/
     └── reservation-schemas.ts    # reserveGiftSchema (el nombre del visitante)
 ```
@@ -64,6 +69,21 @@ Ninguna mutación invalida queries de regalos: la UI se refresca sola por los `o
 - `cancelReservation` / `markGiftBought`: solo proceden si `status === 'reserved'` **y** `sha256(tokenEnviado) === reservedByTokenHash`. Un visitante no puede tocar reservas ajenas ni aunque llame a la función a mano.
 - Al cancelar (o cuando un admin reabre) se limpian `reservedBy`, `reservedByTokenHash`, `reservedAt` y `boughtAt`.
 
+## Multidevice: transferir la identidad a otro dispositivo
+
+La identidad del visitante vive en el `localStorage` de un navegador concreto, pero **es portable**: en el panel "Regalo reservado!" del detalle hay un botón **"Usar en otro dispositivo"** (`transfer-dialog.tsx`) que genera una URL con el token en el **fragment**:
+
+```
+https://<dominio>/importar?lista=<listId>#<token>
+```
+
+- El **QR se genera al vuelo en el cliente** (librería `qrcode`, lazy-load al abrir el diálogo) — no se guarda en ningún sitio; el otro dispositivo lo escanea de la pantalla. También se puede copiar el enlace o usar la hoja de compartir nativa (`navigator.share`) para autoenviárselo (WhatsApp, email a uno mismo...).
+- El token va en el `#fragment`, que **nunca viaja a ningún servidor** ni aparece en logs/referrers.
+- La página `/importar` (`import-visitor-page.tsx`) valida el token, lo elimina de la barra de direcciones (`history.replaceState`) y lo guarda en el `localStorage` del dispositivo nuevo. Si ese dispositivo ya tenía otra identidad, pide confirmación antes de reemplazarla.
+- **Cero backend**: functions, rules y Firestore no cambian. Ambos dispositivos comparten identidad porque generan el mismo hash.
+- El enlace guardado sirve también como **respaldo**: si el visitante borra localStorage, puede reabrir su enlace y recuperar la identidad — siempre que se lo guardara *antes*.
+- Aviso al usuario en el diálogo: quien tiene el enlace **es** el visitante — no debe compartirse.
+
 ## Limitaciones conocidas
 
 **Si el visitante borra `localStorage` (o cambia de navegador/dispositivo, o usa incógnito), pierde el acceso a sus propias reservas.**
@@ -74,7 +94,7 @@ Ninguna mutación invalida queries de regalos: la UI se refresca sola por los `o
 - También pierde el nombre guardado (`regalitos_visitor_name`) — solo afecta a la comodidad de no tener que reescribirlo.
 - Puede seguir reservando **otros** regalos con normalidad; el token nuevo es válido para reservas futuras.
 - **No es un fallo de seguridad**: nadie roba la reserva ni puede impersonar a otro visitante. Es el propio dueño quien pierde su vía de autogestión.
-- **Única recuperación**: el admin reabre el regalo (`reopenGift`, no requiere token) o lo marca comprado directamente desde el panel.
+- **Recuperación**: si el visitante se guardó su [enlace de transferencia](#multidevice-transferir-la-identidad-a-otro-dispositivo), basta con reabrirlo. Si no, la única salida es el admin: reabre el regalo (`reopenGift`, no requiere token) o lo marca comprado directamente desde el panel.
 
 Es un trade-off inherente al modelo "reservar sin registrarse": al no haber cuenta, la única prueba de propiedad es un secreto local al dispositivo. Cualquier alternativa (cuentas de visitante, magic links) añadiría la fricción que la app busca evitar.
 
