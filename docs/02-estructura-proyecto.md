@@ -47,7 +47,7 @@ src/
 │   └── shared/
 │       ├── components/     # UI genérica: Button, FormField, Input, Card, Text,
 │       │                   # ConfirmDialog, StatusBadge, AppHeader, PageShell...
-│       ├── hooks/          # use-autofill-sync, use-click-outside, use-mobile
+│       ├── hooks/          # use-click-outside, use-mobile
 │       ├── layouts/        # PublicLayout, AdminLayout, AuthGuard
 │       └── utils/          # cn (clsx+twMerge), format-price, firebase-errors,
 │                           # normalize-name
@@ -76,6 +76,8 @@ features/<nombre>/
 ```
 
 Regla de dependencia práctica: **páginas → hooks → api → `src/lib/firebase.ts`**. Los componentes de UI genérica viven en `src/app/shared/components/`.
+
+> ⚠️ **Cualquier componente que envuelva un `<input>`/`<textarea>` y vaya a usarse con `register()` de react-hook-form debe usar `forwardRef`** (así lo hacen `FormField`, `Input` y `Textarea`). En React 18 una `ref` normal no llega a un componente de función — si se te olvida, `register()` queda desconectado del DOM y los envíos llegan con valores `undefined`, sin ningún error visible salvo el de validación. Es justo el bug que forzó (y que ya no hace falta) el antiguo hook `useAutofillSync`.
 
 Cada feature está documentada en detalle en [`docs/features/`](features/).
 

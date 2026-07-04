@@ -37,7 +37,6 @@ El store de auth es la **única fuente de verdad de sesión** en el cliente: cua
 Página: `src/app/pages/public/create-list-page.tsx`. Un solo formulario crea la lista **y** la cuenta del admin (y opcionalmente el co-admin).
 
 - Validación con zod: `createListSchema` en `src/features/lists/schemas/list-schemas.ts` (exige contraseña de co-admin si diste su email).
-- `useAutofillSync` (`src/app/shared/hooks/use-autofill-sync.ts`): workaround para que el autofill de Chrome sincronice los valores al estado de react-hook-form.
 - Si ya tienes `listId` en el store, la página redirige a tu configuración.
 
 La mutación `useCreateListMutation` (`src/features/lists/hooks/use-create-list.ts`):
